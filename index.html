@@ -369,7 +369,7 @@ function openForm(){
         <div class="field"><label>날짜</label><input id="f-date" type="date"></div>
       </div>
       <div class="field"><label>관찰 메모</label><textarea id="f-notes" placeholder="무엇을, 어떻게 보았나요? 생태 정보·느낌을 남겨주세요."></textarea></div>
-      <div class="field"><label>사진 URL (선택)</label><input id="f-img" placeholder="https://… (비우면 도감 실루엣)"></div>
+      <div class="field"><label>사진 URL (선택)</label><input id="f-img" placeholder="https://… (비우면 도감 실루엣)"></div><div class="field"><label>🔎 사진으로 식물 식별 <span style="color:var(--ink-2);font-weight:400">(Pl@ntNet)</span></label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="f-file" type="file" accept="image/*" capture="environment" style="flex:1;min-width:140px;font-family:var(--font-mono);font-size:12px;border:none;padding:0"><button type="button" class="btn btn-ghost" style="padding:8px 13px;font-size:13px" onclick="identifyPlant()">식별</button></div><div id="idresult" style="font-family:var(--font-mono);font-size:12px;color:var(--ink-2);margin-top:8px;line-height:1.6"></div></div>
       <div class="field"><label>대표 이모지</label><div class="emojipick" id="ep">${E.map(e=>`<button type="button" class="${e==='🌿'?'on':''}" onclick="pickE(this,'${e}')">${e}</button>`).join("")}</div></div>
       <div class="field"><label>관찰자</label><input id="f-obs" placeholder="이름 또는 닉네임 (선택)"></div>
       <button class="btn btn-stamp" style="width:100%;justify-content:center" onclick="saveObs(this)">🖋 표본 등록(인장 찍기)</button>
@@ -427,6 +427,74 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 function applyTheme(t){document.documentElement.setAttribute("data-theme",t);const b=document.getElementById("themeBtn");b.textContent=t==="dark"?"☀":"☾";b.setAttribute("aria-pressed",t==="dark");localStorage.setItem("nl_theme",t);}
 function toggleTheme(){applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");}
 (function initTheme(){const s=localStorage.getItem("nl_theme");applyTheme(s||((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"));})();
+
+
+// ── Pl@ntNet 식별 + GBIF 도감 (캐싱·다운스케일 최적화) ──
+const FN_URL=SUPA_URL+"/functions/v1/identify-plant";
+const IDCACHE="naturelens_idcache_v1", GBIFCACHE="naturelens_gbif_v1";
+function _c(k){try{return JSON.parse(localStorage.getItem(k)||"{}")}catch(e){return{}}}
+function _cset(k,o){localStorage.setItem(k,JSON.stringify(o));}
+function fileToScaledB64(file,max){max=max||800;return new Promise((res,rej)=>{
+  const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{let w=img.width,h=img.height,s=Math.min(1,max/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",0.82).split(",")[1]);};
+  img.onerror=rej;img.src=u;});}
+async function identifyPlant(){
+  const out=document.getElementById("idresult");
+  const file=(document.getElementById("f-file").files||[])[0], url=v("f-img");
+  if(!file&&!url){out.textContent="사진 파일을 선택하거나 사진 URL을 입력하세요.";return;}
+  const key=file?("f:"+file.name+":"+file.size):("u:"+url);
+  const cache=_c(IDCACHE);
+  if(cache[key]){renderIdSuggestions(cache[key]);return;}
+  out.innerHTML='<span class="live-dot"></span>식별 중… (Pl@ntNet)';
+  try{
+    let body;
+    if(file){body={imageBase64:await fileToScaledB64(file),mime:"image/jpeg"};}
+    else{body={imageUrl:url};}
+    const r=await fetch(FN_URL,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY},body:JSON.stringify(body)});
+    const data=await r.json().catch(()=>({}));
+    if(r.status===503){out.innerHTML="⚙️ 관리자 설정 필요: Supabase Secrets에 <b>PLANTNET_API_KEY</b>를 추가하면 식별이 켜집니다.";return;}
+    if(!r.ok||data.error){out.textContent="식별 실패: "+(data.error||("HTTP "+r.status));return;}
+    const results=data.results||[];
+    if(!results.length){out.textContent="식별 결과 없음 — 잎·꽃이 또렷한 식물 사진으로 다시 시도해 보세요.";return;}
+    cache[key]=results;_cset(IDCACHE,cache);
+    renderIdSuggestions(results);
+  }catch(e){out.textContent="오류: "+((e&&e.message)||e);}
+}
+function renderIdSuggestions(results){
+  const out=document.getElementById("idresult");
+  out.innerHTML="<div style='margin-bottom:5px'>후보 (탭하면 학명·도감 자동 채움):</div>"+results.map(r=>{
+    const pct=Math.round((r.score||0)*100), cn=(r.commonNames&&r.commonNames[0])?(" · "+esc(r.commonNames[0])):"";
+    return "<button type='button' class='cat' style='display:block;width:100%;text-align:left;margin:3px 0;padding:7px 9px;cursor:pointer' onclick='pickSuggestion("+JSON.stringify(r).replace(/'/g,"&#39;").replace(/"/g,"&quot;")+")'><i style=\"font-family:var(--font-display);color:var(--botanic)\">"+esc(r.scientificName)+"</i> — "+pct+"%"+cn+"</button>";
+  }).join("");
+}
+async function pickSuggestion(r){
+  if(typeof r==="string"){try{r=JSON.parse(r)}catch(e){return}}
+  document.getElementById("f-sci").value=r.scientificName||"";
+  document.getElementById("f-cat").value="식물";
+  if(r.commonNames&&r.commonNames[0]&&!v("f-title"))document.getElementById("f-title").value=r.commonNames[0];
+  const out=document.getElementById("idresult");
+  out.innerHTML='<span class="live-dot"></span>GBIF 도감 조회…';
+  const g=await gbifLookup(r.scientificName);
+  if(g){
+    const meta="과 "+(g.family||"-")+" · 목 "+(g.order||"-")+" · 계 "+(g.kingdom||"-");
+    const link=g.usageKey?(" (<a href='https://www.gbif.org/species/"+g.usageKey+"' target='_blank' rel='noopener'>GBIF 도감</a>)"):"";
+    out.innerHTML="✔ <i style='color:var(--botanic)'>"+esc(r.scientificName)+"</i> 채움 · "+esc(meta)+link;
+    const nt=document.getElementById("f-notes");
+    if(nt && nt.value.indexOf("[도감]")<0) nt.value=(nt.value?nt.value+"\n":"")+"[도감] "+meta+(g.usageKey?(" · GBIF:"+g.usageKey):"");
+  }else{ out.innerHTML="✔ <i style='color:var(--botanic)'>"+esc(r.scientificName)+"</i> 채움 (GBIF 매칭 없음)"; }
+}
+async function gbifLookup(name){
+  if(!name)return null;
+  const c=_c(GBIFCACHE); if(name in c) return c[name];
+  try{
+    const r=await fetch("https://api.gbif.org/v1/species/match?name="+encodeURIComponent(name));
+    const d=await r.json();
+    const out=(d&&d.matchType&&d.matchType!=="NONE")?{family:d.family,order:d.order,kingdom:d.kingdom,genus:d.genus,usageKey:d.usageKey,rank:d.rank}:null;
+    c[name]=out;_cset(GBIFCACHE,c);return out;
+  }catch(e){return null;}
+}
 
 function openFromHash(){const m=location.hash.match(/obs=([^&]+)/);if(!m)return;const id=decodeURIComponent(m[1]);if(items.some(o=>o.id===id))openDetail(id);}
 (async function init(){ await loadObs(); render(); openFromHash(); })();
