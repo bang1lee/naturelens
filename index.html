@@ -98,6 +98,7 @@
   .emojipick button{font-size:22px;background:#f3f7f0;border:2px solid transparent;border-radius:10px;width:42px;height:42px;cursor:pointer}
   .emojipick button.on{border-color:var(--leaf);background:#e7f3dd}
 
+  .aboutbar{background:#f0f7ea;border:1px solid var(--line);border-left:4px solid var(--leaf);border-radius:12px;padding:12px 15px;font-size:13.5px;color:#3a473f;margin:18px 0 2px;line-height:1.55}
   footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:13px}
   footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center}
   .linkbtn{background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;padding:0}
@@ -125,6 +126,7 @@
 
 <div class="wrap">
   <div class="stats" id="stats"></div>
+  <div class="aboutbar">🌱 네이처 렌즈는 <b>뉴리프 내부 자연탐방</b>(안성 오흥리 보개면 청소년 자연캠프·굴업도 탐방 등)의 관찰을 모으는 <b>열린 아카이브</b>입니다. 누구나 링크로 보고, 기록을 더하고, 공유해 함께 데이터를 쌓아요. <span style="opacity:.7">— 지금은 웹 MVP, 추후 퍼블릭 앱으로.</span></div>
 
   <div class="controls">
     <div class="search">🔎 <input id="q" placeholder="종·장소·메모 검색…" oninput="render()"></div>
@@ -158,7 +160,7 @@
 <script>
 const SEED = [
   {id:"s-jakyak", title:"작약 군락", sci:"Paeonia lactiflora", emoji:"🌸", cat:"식물",
-   loc:"안성 오흥리(보개면)", date:"2026-05-24", notes:"오흥리 6차산업 시범지 일대 작약 개화. 뉴리프 작약 생태 미디어('우아한 고요')의 무대. 함박꽃이라 불리며 뿌리는 한방 약재로 쓰인다.", obs:"뉴리프 아카이브"},
+   loc:"안성 오흥리(보개면)", date:"2026-05-24", notes:"오흥리 재생유기농·치유농업 6차산업 시범지의 작약 개화. 뉴리프 작약 생태 미디어('우아한 고요')의 무대로, 함박꽃이라 불리며 뿌리는 한방 약재이자 인문적 상징을 지닌다.", obs:"뉴리프 아카이브"},
   {id:"s-camp", title:"청소년 자연캠프 현장", sci:"", emoji:"🧒", cat:"풍경",
    loc:"안성 오흥리(보개면)", date:"2026-05-10", notes:"안성지역 초·중·고 학생 대상 자연탐방 캠프. 텃밭·생태 관찰로 자연 감수성을 쌓는 뉴리프 정기 프로그램(5/10·5/31·6/7).", obs:"뉴리프 아카이브"},
   {id:"s-bee", title:"양봉 꿀벌 방문", sci:"Apis mellifera", emoji:"🐝", cat:"곤충",
@@ -241,7 +243,7 @@ function openDetail(id){
         ${o.sci?`<dt>학명</dt><dd><i>${esc(o.sci)}</i></dd>`:''}
         <dt>분류</dt><dd>${esc(o.cat||'-')}</dd>
         <dt>계절</dt><dd><span style="color:${col};font-weight:800">${se}</span></dd>
-        <dt>장소</dt><dd>${esc(o.loc||'-')}</dd>
+        <dt>장소</dt><dd>${esc(o.loc||'-')}${o.loc?` <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.loc)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600">🗺 지도</a>`:''}</dd>
         <dt>날짜</dt><dd>${esc(o.date||'-')}</dd>
         <dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
       </dl>
@@ -324,7 +326,7 @@ function openDetail2(o, offerAdd){
       <dl class="kv">
         ${o.sci?`<dt>학명</dt><dd><i>${esc(o.sci)}</i></dd>`:''}
         <dt>분류</dt><dd>${esc(o.cat||'-')}</dd><dt>계절</dt><dd><span style="color:${col};font-weight:800">${se}</span></dd>
-        <dt>장소</dt><dd>${esc(o.loc||'-')}</dd><dt>날짜</dt><dd>${esc(o.date||'-')}</dd><dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
+        <dt>장소</dt><dd>${esc(o.loc||'-')}${o.loc?` <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.loc)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600">🗺 지도</a>`:''}</dd><dt>날짜</dt><dd>${esc(o.date||'-')}</dd><dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
       </dl>
       ${o.notes?`<div class="notes">${esc(o.notes)}</div>`:''}
       ${offerAdd?`<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick='addShared(${JSON.stringify(o).replace(/'/g,"&#39;")})'>＋ 내 렌즈에 추가</button>`:'<div style="margin-top:14px;color:var(--muted);font-size:13px">이미 내 렌즈에 있는 관찰입니다.</div>'}
