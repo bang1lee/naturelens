@@ -1,357 +1,435 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>네이처 렌즈 · 뉴리프 자연탐방 아카이브</title>
-<meta name="description" content="오흥리 보개면·굴업도 자연탐방 데이터를 쌓고 나누는 뉴리프 네이처 렌즈. 링크만으로 누구나.">
+<title>자연탐방 박물지 · 네이처 렌즈 (Nature Lens)</title>
+<meta name="description" content="오흥리 보개면·굴업도 뉴리프 자연탐방의 관찰을 한 권의 살아있는 박물지로. 링크만으로 누구나 보고·기록하면 실시간으로 함께 쌓입니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Noto+Serif+KR:wght@400;600;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --green:#1F5F3A; --leaf:#98C461; --deep:#081116;
-    --paper:#FBFDF8; --ink:#23302a; --muted:#6b7a70; --line:#e3ece1;
-    --card:#ffffff; --shadow:0 6px 22px rgba(16,40,28,.08);
-    --spring:#E8829B; --summer:#3D8252; --autumn:#D98A3D; --winter:#5B86B0;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{font-family:"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,sans-serif;
-    background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
-  a{color:var(--green)}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+:root{
+  --bg:#FFFBEC; --bg-2:#FCF7E5; --surface:#F5F2EB; --surface-2:#FFFFFF;
+  --ink:#171412; --ink-2:#4A5560; --rule:#423B32; --line:#E6DDC3;
+  --accent:#C87A53; --botanic:#2A6B53; --olive:#96A282;
+  --season-spring:#3F9BB0; --season-summer:#2A6B53; --season-fall:#C87A53; --season-winter:#8AAE58;
+  --warn:#B8860B; --live:#7C9A2E;
+  --font-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --font-serif:"Noto Serif KR","AppleMyungjo",serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--sp-8:64px;
+  --r-xs:2px;--r-sm:4px;--r-md:6px;--r-lg:10px;
+  --shadow-paper:0 1px 2px rgba(23,20,18,.06),0 6px 16px rgba(23,20,18,.07);
+  --shadow-lift:0 2px 4px rgba(23,20,18,.08),0 14px 30px rgba(23,20,18,.12);
+  --shadow-modal:0 24px 70px rgba(23,20,18,.28);
+  --ease-settle:cubic-bezier(.2,.7,.3,1);--ease-paper:cubic-bezier(.25,1,.5,1);
+  --content-max:1080px;--margin-x:clamp(18px,6vw,80px);
+}
+[data-theme="dark"]{
+  --bg:#171412;--bg-2:#1B1714;--surface:#211C18;--surface-2:#2A2520;
+  --ink:#F5F2EB;--ink-2:#A6B392;--rule:rgba(200,122,83,.30);--line:rgba(245,242,235,.10);
+  --accent:#D38C63;--botanic:#9ED4DD;--olive:#A4CC6E;
+  --season-spring:#9ED4DD;--season-summer:#6FB58C;--season-fall:#D38C63;--season-winter:#A4CC6E;
+  --warn:#FFD96B;--live:#D8E972;
+  --shadow-paper:0 1px 2px rgba(0,0,0,.5),0 8px 22px rgba(0,0,0,.45);
+  --shadow-lift:0 2px 6px rgba(0,0,0,.6),0 18px 40px rgba(0,0,0,.55);
+  --shadow-modal:0 30px 80px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font-serif);color:var(--ink);background-color:var(--bg);line-height:1.75;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(200,122,83,.012) 0,rgba(200,122,83,.012) 1px,transparent 1px,transparent 8px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  -webkit-font-smoothing:antialiased;transition:background-color .4s,color .4s;
+}
+[data-theme="dark"] body{background-image:
+  repeating-linear-gradient(0deg,rgba(200,122,83,.02) 0,rgba(200,122,83,.02) 1px,transparent 1px,transparent 8px),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");}
+.wrap{max-width:var(--content-max);margin:0 auto;padding:0 var(--margin-x)}
+.mono{font-family:var(--font-mono)}
+a{color:var(--botanic);text-decoration:none}
+.hair{border:0;border-top:.5px solid var(--rule);margin:0}
+.hair2{border:0;height:4px;border-top:.5px solid var(--rule);border-bottom:.5px solid var(--rule);margin:0}
 
-  /* Hero */
-  header.hero{background:
-      radial-gradient(1200px 400px at 80% -10%, rgba(152,196,97,.35), transparent 60%),
-      linear-gradient(135deg, #15412a 0%, var(--green) 55%, #2c7a4d 100%);
-    color:#eafaef;padding:38px 0 30px;position:relative;overflow:hidden}
-  .hero h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
-  .hero .lens{font-size:30px}
-  .hero p{margin:10px 0 0;max-width:640px;color:#d6f0de;font-size:15px}
-  .hero .tag{display:inline-block;margin-top:14px;background:rgba(255,255,255,.14);
-    border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 13px;font-size:12.5px}
-  .hero .cta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
-  .btn{cursor:pointer;border:none;border-radius:11px;padding:11px 16px;font-size:14px;font-weight:700;
-    font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:7px}
-  .btn-primary{background:var(--leaf);color:#0f3220}
-  .btn-primary:hover{background:#aee079;transform:translateY(-1px)}
-  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
-  .btn-ghost:hover{background:rgba(255,255,255,.2)}
+.title-plate{position:relative;padding:var(--sp-8) 0 var(--sp-7);text-align:center;overflow:hidden;
+  background-image:radial-gradient(1100px 560px at 82% -10%,rgba(252,247,229,.95),transparent 60%);}
+[data-theme="dark"] .title-plate{background-image:radial-gradient(900px 500px at 82% -10%,rgba(211,140,99,.12),transparent 60%);}
+.plate-inner{padding:var(--sp-6) 0}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);margin-bottom:var(--sp-4)}
+h1.title{font-family:var(--font-display);font-weight:400;font-variation-settings:"opsz" 88;
+  font-size:clamp(40px,6.5vw,78px);letter-spacing:-.02em;line-height:1.02;margin:0;color:var(--ink);
+  animation:inkdry .9s var(--ease-paper) both}
+.subtitle{font-family:var(--font-display);font-style:italic;font-weight:400;font-size:clamp(16px,2.2vw,24px);color:var(--ink-2);margin-top:var(--sp-3)}
+.pub{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--ink-2);margin-top:var(--sp-4)}
+.seal{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;
+  border:1.5px solid var(--accent);color:var(--accent);margin:var(--sp-4) auto 0;opacity:.9}
+.cta{margin-top:var(--sp-6);display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap;align-items:center}
+.intro{max-width:600px;margin:var(--sp-5) auto 0;color:var(--ink-2);font-size:15px}
 
-  /* Stats */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:-22px auto 0;position:relative;z-index:2}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow)}
-  .stat b{display:block;font-size:24px;color:var(--green);font-weight:800;line-height:1.1}
-  .stat span{font-size:12px;color:var(--muted)}
+.btn{cursor:pointer;font-family:var(--font-serif);font-size:14px;border-radius:var(--r-sm);padding:11px 18px;
+  display:inline-flex;align-items:center;gap:7px;transition:transform .12s var(--ease-settle),background .15s,border-color .15s}
+.btn-stamp{font-weight:600;color:#FFFBEC;background:var(--accent);border:none;box-shadow:var(--shadow-paper)}
+.btn-stamp:hover{transform:scale(.985)} .btn-stamp:active{transform:scale(.96)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn-ghost:hover{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.iconbtn{cursor:pointer;background:transparent;border:1px solid var(--rule);border-radius:50%;width:40px;height:40px;
+  color:var(--ink);font-size:17px;display:inline-flex;align-items:center;justify-content:center}
+.iconbtn:hover{border-color:var(--accent);color:var(--accent)}
 
-  /* Controls */
-  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:24px 0 16px}
-  .search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
-    border-radius:11px;padding:9px 13px}
-  .search input{border:none;outline:none;font-size:14px;width:100%;font-family:inherit;background:transparent}
-  .chips{display:flex;gap:7px;flex-wrap:wrap}
-  .chip{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:13px;color:var(--muted);transition:.12s}
-  .chip:hover{border-color:var(--leaf)}
-  .chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin:var(--sp-6) 0 var(--sp-4)}
+.stat{text-align:center;padding:var(--sp-4) var(--sp-2);border-left:.5px dashed var(--line)}
+.stat:first-child{border-left:none}
+.stat b{display:block;font-family:var(--font-display);font-weight:900;font-variation-settings:"opsz" 144;
+  font-size:clamp(34px,6vw,62px);line-height:1;color:var(--ink);letter-spacing:-.02em}
+[data-theme="dark"] .stat b{opacity:.78}
+.stat span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--ink-2)}
 
-  /* Grid */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin:8px 0 40px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
-    box-shadow:var(--shadow);cursor:pointer;transition:.16s;display:flex;flex-direction:column}
-  .card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(16,40,28,.13)}
-  .card .thumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:60px;
-    background:linear-gradient(135deg,#eef6e9,#dcebd2 0%,#e7f2df);position:relative}
-  .card .thumb img{width:100%;height:100%;object-fit:cover}
-  .card .season{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:#fff;
-    padding:3px 9px;border-radius:999px}
-  .card .body{padding:13px 14px 15px}
-  .card h3{margin:0 0 3px;font-size:16px;font-weight:800;letter-spacing:-.01em}
-  .card .sci{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px}
-  .card .meta{display:flex;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
-  .card .meta span{display:inline-flex;align-items:center;gap:3px}
-  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:50px 0}
+.controls{display:flex;gap:var(--sp-4);align-items:center;flex-wrap:wrap;margin:var(--sp-5) 0 var(--sp-3)}
+.tabs{display:flex;gap:var(--sp-4);flex-wrap:wrap}
+.tab{cursor:pointer;background:none;border:none;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;
+  color:var(--ink-2);padding:4px 0;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.tab .dot{width:6px;height:6px;border-radius:50%}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 13px}
+.search input{border:none;outline:none;background:transparent;font-family:var(--font-serif);font-size:14px;width:100%;color:var(--ink)}
+.catbar{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-4)}
+.cat{cursor:pointer;background:none;border:none;font-family:var(--font-mono);font-size:11px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--ink-2);padding:3px 8px;border:.5px solid var(--rule);border-radius:var(--r-xs)}
+.cat.on{color:var(--accent);border-color:var(--accent)}
 
-  /* Modal */
-  .ovl{position:fixed;inset:0;background:rgba(8,17,22,.55);display:none;align-items:center;justify-content:center;
-    z-index:50;padding:18px}
-  .ovl.show{display:flex}
-  .modal{background:#fff;border-radius:18px;max-width:540px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
-  .modal .head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff}
-  .modal .head h2{margin:0;font-size:18px}
-  .x{cursor:pointer;border:none;background:#f0f4ee;border-radius:9px;width:32px;height:32px;font-size:18px;color:var(--muted)}
-  .modal .pad{padding:18px 20px}
-  .detail-hero{height:170px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:84px;
-    background:linear-gradient(135deg,#eef6e9,#e7f2df);margin-bottom:14px;overflow:hidden}
-  .detail-hero img{width:100%;height:100%;object-fit:cover}
-  .kv{display:grid;grid-template-columns:84px 1fr;gap:7px 12px;font-size:14px;margin:12px 0}
-  .kv dt{color:var(--muted)}
-  .kv dd{margin:0;font-weight:600}
-  .notes{background:#f6faf3;border-left:3px solid var(--leaf);border-radius:8px;padding:12px 14px;font-size:14px;color:#3a473f;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:var(--sp-5);margin:var(--sp-5) 0 var(--sp-8)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;
+  box-shadow:var(--shadow-paper);cursor:pointer;display:flex;flex-direction:column;
+  transition:transform .22s var(--ease-settle),box-shadow .22s var(--ease-settle);
+  animation:settle .5s var(--ease-settle) both}
+[data-theme="dark"] .card{border-radius:18px 8px 16px 10px}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.thumb{position:relative;height:158px;background:var(--bg-2);display:flex;align-items:center;justify-content:center}
+.thumb img{width:100%;height:100%;object-fit:cover}
+[data-theme="dark"] .thumb img{filter:sepia(.06)}
+.thumb .ph{color:var(--olive);opacity:.5}
+.pin{position:absolute;top:9px;right:11px;color:var(--accent);opacity:.85}
+.sdot{position:absolute;top:13px;left:12px;width:7px;height:7px;border-radius:50%}
+.cbody{padding:var(--sp-3) var(--sp-4) var(--sp-4);border-top:.5px solid var(--line)}
+.cname{font-family:var(--font-serif);font-weight:600;font-size:17px;letter-spacing:-.01em;margin:0}
+.csci{font-family:var(--font-display);font-style:italic;font-size:13px;color:var(--botanic);margin:2px 0 9px;min-height:1.2em}
+.clabel{font-family:var(--font-mono);font-size:11px;letter-spacing:.03em;color:var(--ink-2);display:flex;gap:7px;flex-wrap:wrap}
+.empty{grid-column:1/-1;text-align:center;color:var(--ink-2);padding:60px 18px;border:1px dashed var(--line);border-radius:var(--r-md)}
 
-  /* Form */
-  .field{margin-bottom:13px}
-  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px;color:#3a473f}
-  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none}
-  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--leaf)}
-  .field textarea{min-height:76px;resize:vertical}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  .emojipick{display:flex;gap:6px;flex-wrap:wrap}
-  .emojipick button{font-size:22px;background:#f3f7f0;border:2px solid transparent;border-radius:10px;width:42px;height:42px;cursor:pointer}
-  .emojipick button.on{border-color:var(--leaf);background:#e7f3dd}
+.ovl{position:fixed;inset:0;background:rgba(23,20,18,.22);display:none;align-items:center;justify-content:center;z-index:50;padding:18px}
+[data-theme="dark"] .ovl{background:rgba(0,0,0,.55)}
+.ovl.show{display:flex}
+.modal{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-lg);max-width:560px;width:100%;
+  max-height:90vh;overflow:auto;box-shadow:var(--shadow-modal);animation:pageturn .42s var(--ease-paper) both}
+[data-theme="dark"] .modal{border-radius:16px 9px 16px 9px}
+.mhead{position:sticky;top:0;background:var(--surface-2);display:flex;justify-content:space-between;align-items:center;
+  padding:15px 20px;border-bottom:.5px solid var(--rule)}
+.mhead .plate{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--ink-2)}
+.x{cursor:pointer;border:none;background:transparent;color:var(--ink-2);font-size:20px;width:32px;height:32px;border-radius:var(--r-xs)}
+.x:hover{color:var(--accent)}
+.mpad{padding:var(--sp-5) var(--sp-5) var(--sp-6)}
+.plate-img{height:230px;border-radius:var(--r-sm);background:var(--bg-2);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--line)}
+.plate-img img{width:100%;height:100%;object-fit:cover}
+.mtitle{font-family:var(--font-display);font-variation-settings:"opsz" 40;font-weight:500;font-size:24px;margin:var(--sp-4) 0 0}
+.kv{display:grid;grid-template-columns:90px 1fr;gap:8px 14px;font-size:14px;margin:var(--sp-4) 0}
+.kv dt{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2);align-self:center}
+.kv dd{margin:0;font-family:var(--font-serif);font-weight:500;border-bottom:1px dotted var(--line);padding-bottom:6px}
+.kv dd i{font-family:var(--font-display);font-style:italic;color:var(--botanic)}
+.notes{margin-top:var(--sp-4);background:var(--bg-2);border-left:2px solid var(--accent);border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:13px 15px;font-size:14px;color:var(--ink);transform:rotate(-.3deg)}
 
-  .aboutbar{background:#f0f7ea;border:1px solid var(--line);border-left:4px solid var(--leaf);border-radius:12px;padding:12px 15px;font-size:13.5px;color:#3a473f;margin:18px 0 2px;line-height:1.55}
-  footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:13px}
-  footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center}
-  .linkbtn{background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;padding:0}
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--deep);color:#eafaef;
-    padding:11px 18px;border-radius:11px;font-size:14px;opacity:0;transition:.25s;z-index:100;pointer-events:none}
-  .toast.show{opacity:1}
-  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.hero h1{font-size:24px}}
+.field{margin-bottom:var(--sp-4)}
+.field label{display:block;font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;
+  font-family:var(--font-serif);font-size:15px;color:var(--ink);padding:7px 2px;outline:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-bottom-color:var(--botanic)}
+.field textarea{min-height:70px;resize:vertical;border:1px solid var(--rule);border-radius:var(--r-sm);padding:9px 11px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)}
+.emojipick{display:flex;gap:7px;flex-wrap:wrap}
+.emojipick button{font-size:21px;background:transparent;border:1px solid var(--line);border-radius:var(--r-sm);width:42px;height:42px;cursor:pointer}
+.emojipick button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+footer{border-top:.5px solid var(--rule);background:var(--bg-2);padding:var(--sp-6) 0 var(--sp-8);margin-top:var(--sp-6)}
+.findex{columns:2;column-gap:var(--sp-7);font-family:var(--font-mono);font-size:12px;color:var(--ink-2);margin:var(--sp-4) 0}
+.findex .row{break-inside:avoid;display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.findex .row .lead{flex:1;border-bottom:1px dotted var(--line);transform:translateY(-3px)}
+.frow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center;margin-top:var(--sp-4)}
+.linkbtn{background:none;border:none;color:var(--botanic);cursor:pointer;font-family:var(--font-mono);font-size:12px}
+.notice{font-family:var(--font-mono);font-size:11px;color:var(--ink-2);margin-top:var(--sp-3);opacity:.85}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--bg);
+  font-family:var(--font-serif);font-size:14px;padding:11px 18px;border-radius:var(--r-sm);opacity:0;transition:.3s;z-index:100;pointer-events:none;box-shadow:var(--shadow-lift)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--live);margin-right:5px;vertical-align:middle}
+
+@keyframes inkdry{from{opacity:0;filter:blur(3px)}to{opacity:1;filter:blur(0)}}
+@keyframes settle{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pageturn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--r-xs)}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);gap:var(--sp-4) 0}.stat:nth-child(3){border-left:none}.row2{grid-template-columns:1fr}.findex{columns:1}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.card:hover{transform:none}}
 </style>
 </head>
 <body>
-<header class="hero">
+<header class="title-plate">
   <div class="wrap">
-    <h1><span class="lens">🌿</span> 네이처 렌즈 <span style="font-weight:400;font-size:18px;opacity:.85">Nature Lens</span></h1>
-    <p>오흥리 보개면·굴업도… 뉴리프 자연탐방의 순간을 <b>기록하고 나누는</b> 열린 아카이브.
-       앱 설치 없이 <b>이 링크 하나</b>로 누구나 보고, 남기고, 공유합니다.</p>
-    <span class="tag">🌱 (사)뉴리프 아카이브 · 웹 기반 MVP · 데이터를 쌓는 렌즈</span>
+    <hr class="hair2">
+    <div class="plate-inner">
+      <div class="eyebrow">(사)뉴리프 아카이브 · 자연탐방 박물지</div>
+      <h1 class="title">자연탐방 박물지</h1>
+      <div class="subtitle">A Field Notebook of Newleaf — Nature Lens</div>
+      <div class="seal" title="뉴리프">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21c0-6 0-9 6-13-1 6-3 9-6 9-3 0-5-2-6-6 4 1 6 3 6 10z"/></svg>
+      </div>
+      <div class="pub">제1권 · 오흥리 보개면 · 굴업도 · MMXXVI</div>
+    </div>
+    <hr class="hair2">
+    <p class="intro">오흥리 보개면 청소년 자연캠프와 굴업도 탐방에서 만난 생명들의 표본대지. <b>링크만으로 누구나</b> 펼쳐 보고, 관찰을 더하면 <b>모두의 박물지에 실시간으로 식자(植字)</b>됩니다.</p>
     <div class="cta">
-      <button class="btn btn-primary" onclick="openForm()">＋ 관찰 기록하기</button>
-      <button class="btn btn-ghost" onclick="exportData()">⬇ 데이터 내보내기</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">⬆ 가져오기</button>
-      <input id="imp" type="file" accept="application/json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-stamp" onclick="openForm()">＋ 관찰 기록하기</button>
+      <button class="btn btn-ghost" onclick="exportData()">표본 내보내기(JSON)</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">가져오기</button>
+      <input id="imp" type="file" accept="application/json" hidden onchange="importData(event)">
+      <button class="iconbtn" id="themeBtn" aria-pressed="false" title="낮/밤 페이지" onclick="toggleTheme()">☾</button>
     </div>
   </div>
 </header>
 
-<div class="wrap">
-  <div class="stats" id="stats"></div>
-  <div class="aboutbar">🌱 네이처 렌즈는 <b>뉴리프 내부 자연탐방</b>(안성 오흥리 보개면 청소년 자연캠프·굴업도 탐방 등)의 관찰을 모으는 <b>열린 아카이브</b>입니다. 누구나 링크로 보고, 기록을 더하고, 공유해 함께 데이터를 쌓아요. <span style="opacity:.7">— 지금은 웹 MVP, 추후 퍼블릭 앱으로.</span></div>
-
+<main class="wrap">
+  <section class="stats" id="stats" aria-label="요약 통계"></section>
+  <hr class="hair">
   <div class="controls">
-    <div class="search">🔎 <input id="q" placeholder="종·장소·메모 검색…" oninput="render()"></div>
-    <div class="chips" id="seasonChips"></div>
+    <nav class="tabs" id="seasonTabs" aria-label="계절 색인"></nav>
+    <div class="search">🔎 <input id="q" aria-label="검색" placeholder="종·장소·메모로 색인 찾기" oninput="render()"></div>
   </div>
-  <div class="chips" id="catChips" style="margin-bottom:6px"></div>
-
-  <div class="grid" id="grid"></div>
-</div>
+  <div class="catbar" id="catbar"></div>
+  <section class="grid" id="grid" aria-live="polite"></section>
+</main>
 
 <footer>
-  <div class="wrap row">
-    <div>🌿 <b>네이처 렌즈</b> — 자연탐방 데이터를 쌓고 나누는 뉴리프의 렌즈. 지금은 웹 MVP, 추후 퍼블릭 앱.</div>
-    <div>
-      <button class="linkbtn" onclick="shareApp()">🔗 이 렌즈 공유</button> ·
-      <button class="linkbtn" onclick="resetMine()">내 기록 초기화</button>
+  <div class="wrap">
+    <div class="eyebrow">권말 색인 · Index</div>
+    <div class="findex" id="findex"></div>
+    <hr class="hair">
+    <div class="frow">
+      <div class="mono" style="font-size:12px;color:var(--ink-2)" id="editionLine">자연탐방 박물지 · 네이처 렌즈</div>
+      <div>
+        <button class="linkbtn" onclick="shareApp()">이 박물지 공유</button> ·
+        <button class="linkbtn" onclick="resetMine()">내 로컬 기록 초기화</button>
+      </div>
     </div>
-  </div>
-  <div class="wrap" style="margin-top:8px;font-size:12px;opacity:.75">
-    공유 방식: 관찰을 열고 <b>공유 링크</b>를 복사하면 받는 사람이 같은 관찰을 봅니다 · 단체 데이터는
-    <b>내보내기/가져오기(JSON)</b>로 합칩니다(퍼블릭 앱 단계에서 실시간 공유 백엔드로 전환).
+    <div class="notice" id="backendNotice"></div>
   </div>
 </footer>
 
-<!-- 상세 / 폼 모달 -->
-<div class="ovl" id="ovl" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal"></div>
-</div>
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-const SEED = [
-  {id:"s-jakyak", title:"작약 군락", sci:"Paeonia lactiflora", emoji:"🌸", cat:"식물",
-   loc:"안성 오흥리(보개면)", date:"2026-05-24", notes:"오흥리 재생유기농·치유농업 6차산업 시범지의 작약 개화. 뉴리프 작약 생태 미디어('우아한 고요')의 무대로, 함박꽃이라 불리며 뿌리는 한방 약재이자 인문적 상징을 지닌다.", obs:"뉴리프 아카이브"},
-  {id:"s-camp", title:"청소년 자연캠프 현장", sci:"", emoji:"🧒", cat:"풍경",
-   loc:"안성 오흥리(보개면)", date:"2026-05-10", notes:"안성지역 초·중·고 학생 대상 자연탐방 캠프. 텃밭·생태 관찰로 자연 감수성을 쌓는 뉴리프 정기 프로그램(5/10·5/31·6/7).", obs:"뉴리프 아카이브"},
-  {id:"s-bee", title:"양봉 꿀벌 방문", sci:"Apis mellifera", emoji:"🐝", cat:"곤충",
-   loc:"안성 오흥리 치유텃밭", date:"2026-06-07", notes:"치유농업 텃밭의 꽃을 찾는 꿀벌. 수분 매개자 활동은 6차산업 재생유기농의 건강성 지표.", obs:"뉴리프 아카이브"},
-  {id:"s-sosa", title:"소사나무 능선 군락", sci:"Carpinus turczaninowii", emoji:"🌳", cat:"식물",
-   loc:"인천 옹진 굴업도", date:"2025-10-12", notes:"굴업도 개머리능선의 바람에 휜 소사나무 군락. 섬 생태경관의 상징이자 핵폐기장 반대로 지켜낸 풍경.", obs:"뉴리프 아카이브"},
-  {id:"s-eoksae", title:"개머리능선 억새 물결", sci:"Miscanthus sinensis", emoji:"🌾", cat:"풍경",
-   loc:"인천 옹진 굴업도", date:"2025-10-12", notes:"가을 굴업도 능선을 덮는 억새. 코끼리바위·해식절벽과 어우러진 덕적군도의 대표 경관.", obs:"뉴리프 아카이브"},
-  {id:"s-haedang", title:"해당화", sci:"Rosa rugosa", emoji:"🌹", cat:"식물",
-   loc:"덕적군도 해안사구", date:"2025-06-20", notes:"바닷가 모래언덕에 자생하는 해당화. 해안 생물다양성의 지표종으로 사구 보전의 깃대종.", obs:"뉴리프 아카이브"},
-  {id:"s-falcon", title:"맹금류 활공(말똥가리)", sci:"Buteo buteo", emoji:"🦅", cat:"동물",
-   loc:"인천 옹진 굴업도", date:"2025-11-03", notes:"섬 상공을 도는 맹금류. 굴업도·덕적군도는 이동 철새와 맹금류의 중간 기착지로 생물다양성이 풍부하다.", obs:"뉴리프 아카이브"},
-  {id:"s-snake", title:"구렁이 흔적", sci:"Elaphe schrenckii", emoji:"🐍", cat:"동물",
-   loc:"인천 옹진 굴업도", date:"2025-08-15", notes:"멸종위기 야생생물 구렁이의 서식 흔적. 섬 생태계 건강성을 보여주는 상위 포식자.", obs:"뉴리프 아카이브"},
-  {id:"s-sanguk", title:"산국 가을꽃", sci:"Chrysanthemum boreale", emoji:"🌼", cat:"식물",
-   loc:"안성 오흥리 일대", date:"2025-10-25", notes:"들녘과 능선의 노란 산국. 향이 진해 약용·차로도 쓰이며 늦가을 수분 매개자에게 중요한 밀원.", obs:"뉴리프 아카이브"},
-  {id:"s-deer", title:"고라니 발자국", sci:"Hydropotes inermis", emoji:"🦌", cat:"동물",
-   loc:"안성 오흥리 탐방로", date:"2026-01-18", notes:"겨울 눈밭에 남은 고라니 발자국. 야생동물 이동 통로 확인은 탐방로 생태 모니터링의 기본.", obs:"뉴리프 아카이브"},
+const SUPA_URL="https://ivmbwbmxebbseowgqcjc.supabase.co";
+const SUPA_KEY="sb_publishable_hgn_FNoYVOWYYp5L4SFyKw_8eRkmV_s";
+let sb=null;
+try{ if(window.supabase){ sb=window.supabase.createClient(SUPA_URL,SUPA_KEY); } }catch(e){}
+
+const FALLBACK=[
+  {id:"f1",title:"작약 군락",sci:"Paeonia lactiflora",cat:"식물",loc:"안성 오흥리(보개면)",date:"2026-05-24",emoji:"🌸",notes:"오흥리 재생유기농·치유농업 시범지의 작약. 뉴리프 작약 생태 미디어의 무대.",observer:"뉴리프 아카이브"},
+  {id:"f2",title:"호랑나비 짝짓기",sci:"Papilio xuthus",cat:"곤충",loc:"안성 오흥리 탱자나무 울타리",date:"2026-06-07",emoji:"🦋",notes:"탱자나무는 호랑나비의 대표 기주식물.",observer:"뉴리프 아카이브"},
+  {id:"f3",title:"소사나무 능선 군락",sci:"Carpinus turczaninowii",cat:"식물",loc:"인천 옹진 굴업도",date:"2025-10-12",emoji:"🌳",notes:"굴업도 개머리능선의 바람에 휜 군락.",observer:"뉴리프 아카이브"},
+  {id:"f4",title:"구렁이 흔적",sci:"Elaphe schrenckii",cat:"동물",loc:"인천 옹진 굴업도",date:"2025-08-15",emoji:"🐍",notes:"멸종위기 야생생물.",observer:"뉴리프 아카이브"},
+  {id:"f5",title:"동고비",sci:"Sitta europaea",cat:"동물",loc:"청계산~오흥리 산행로",date:"2026-05-03",emoji:"🐦",notes:"나무를 거꾸로 내려가는 습성.",observer:"뉴리프 아카이브"},
+  {id:"f6",title:"개머리능선 억새 물결",sci:"Miscanthus sinensis",cat:"풍경",loc:"인천 옹진 굴업도",date:"2025-10-12",emoji:"🌾",notes:"덕적군도의 대표 가을 경관.",observer:"뉴리프 아카이브"}
 ];
+const LS="naturelens_local_v2", MYIDS="naturelens_myids_v2";
+const SEASON={봄:"--season-spring",여름:"--season-summer",가을:"--season-fall",겨울:"--season-winter"};
+let items=[], fSeason="전체", fCat="전체", online=false;
 
-const SEASON = {봄:"--spring",여름:"--summer",가을:"--autumn",겨울:"--winter"};
-function seasonOf(date){const m=+(date||"").slice(5,7); if(m>=3&&m<=5)return"봄"; if(m>=6&&m<=8)return"여름"; if(m>=9&&m<=11)return"가을"; return"겨울";}
-const LS="naturelens_observations_v1";
-let fSeason="전체", fCat="전체";
+function seasonOf(d){const m=+(d||"").slice(5,7);if(m>=3&&m<=5)return"봄";if(m>=6&&m<=8)return"여름";if(m>=9&&m<=11)return"가을";return"겨울";}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function mapRow(r){return {id:r.id,title:r.title,sci:r.sci||"",cat:r.cat||"기타",loc:r.loc||"",date:r.obs_date||"",emoji:r.emoji||"🌿",img:r.img||"",notes:r.notes||"",observer:r.observer||"익명",created_at:r.created_at};}
+function localList(){try{return JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){return[]}}
+function myIds(){try{return new Set(JSON.parse(localStorage.getItem(MYIDS)||"[]"))}catch(e){return new Set()}}
+function addMyId(id){const s=myIds();s.add(id);localStorage.setItem(MYIDS,JSON.stringify([...s]));}
+function toast(m){const t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2400);}
 
-function mine(){try{return JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){return[]}}
-function saveMine(a){localStorage.setItem(LS,JSON.stringify(a))}
-function all(){const m=mine();const ids=new Set(m.map(o=>o.id));return [...m, ...SEED.filter(s=>!ids.has(s.id))];}
-
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
+async function loadObs(){
+  if(sb){
+    try{
+      const {data,error}=await sb.from("observations").select("*").eq("hidden",false).order("obs_date",{ascending:false});
+      if(error)throw error;
+      online=true;
+      items=(data||[]).map(mapRow);
+      const lids=new Set(items.map(o=>o.id));
+      localList().forEach(o=>{if(!lids.has(o.id))items.push(o);});
+      subscribeRealtime();
+      document.getElementById("backendNotice").innerHTML='<span class="live-dot"></span>실시간 공유 연결됨 — 누구나 올린 관찰이 모두에게 즉시 식자됩니다.';
+      return;
+    }catch(e){ online=false; }
+  }
+  const base=[...FALLBACK]; const ids=new Set(base.map(o=>o.id));
+  localList().forEach(o=>{if(!ids.has(o.id))base.push(o);});
+  items=base;
+  document.getElementById("backendNotice").textContent="오프라인 표본 보기 — 네트워크 연결 시 실시간 공유본이 표시됩니다.";
+}
+let subbed=false;
+function subscribeRealtime(){
+  if(subbed||!sb)return; subbed=true;
+  sb.channel("obs-rt").on("postgres_changes",{event:"INSERT",schema:"public",table:"observations"},payload=>{
+    const o=mapRow(payload.new);
+    if(!items.some(x=>x.id===o.id)){items.unshift(o);render();toast('<span class="live-dot"></span>다른 탐방자의 새 관찰 +1: '+esc(o.title));}
+  }).subscribe();
+}
 
 function render(){
-  const data=all();
-  const q=(document.getElementById('q').value||"").toLowerCase().trim();
-  // chips
+  const q=(document.getElementById("q").value||"").toLowerCase().trim();
   const seasons=["전체","봄","여름","가을","겨울"];
-  document.getElementById('seasonChips').innerHTML=seasons.map(s=>
-    `<button class="chip ${fSeason===s?'on':''}" onclick="fSeason='${s}';render()">${s}</button>`).join('');
-  const cats=["전체",...Array.from(new Set(data.map(o=>o.cat)))];
-  document.getElementById('catChips').innerHTML=cats.map(c=>
-    `<button class="chip ${fCat===c?'on':''}" onclick="fCat='${c}';render()">${c==='전체'?'모든 분류':c}</button>`).join('');
-  // filter
-  let list=data.filter(o=>{
-    const se=seasonOf(o.date);
-    if(fSeason!=="전체"&&se!==fSeason)return false;
+  document.getElementById("seasonTabs").innerHTML=seasons.map(s=>{
+    const dot=s==="전체"?"":`<span class="dot" style="background:var(${SEASON[s]})"></span>`;
+    return `<button class="tab ${fSeason===s?'on':''}" onclick="fSeason='${s}';render()">${dot}${s}</button>`;}).join("");
+  const cats=["전체",...Array.from(new Set(items.map(o=>o.cat)))];
+  document.getElementById("catbar").innerHTML=cats.map(c=>`<button class="cat ${fCat===c?'on':''}" onclick="fCat='${c}';render()">${c==="전체"?"모든 분류":esc(c)}</button>`).join("");
+  const order=[...items].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  const noMap={}; order.forEach((o,i)=>noMap[o.id]=i+1);
+  let list=items.filter(o=>{
+    if(fSeason!=="전체"&&seasonOf(o.date)!==fSeason)return false;
     if(fCat!=="전체"&&o.cat!==fCat)return false;
-    if(q){const hay=(o.title+o.sci+o.loc+o.notes+o.cat+o.obs).toLowerCase();if(!hay.includes(q))return false;}
+    if(q&&!(o.title+o.sci+o.loc+o.notes+o.cat+o.observer).toLowerCase().includes(q))return false;
     return true;
   }).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
-  // stats
-  const sp=new Set(all().map(o=>o.sci||o.title)), lp=new Set(all().map(o=>o.loc));
-  document.getElementById('stats').innerHTML=
-    stat(all().length,"관찰 기록")+stat(sp.size,"종·대상")+stat(lp.size,"탐방 장소")+stat(mine().length,"내가 남긴 기록");
-  // grid
-  const g=document.getElementById('grid');
-  if(!list.length){g.innerHTML='<div class="empty">조건에 맞는 관찰이 없어요. 첫 기록을 남겨보세요 🌱</div>';return;}
-  g.innerHTML=list.map(o=>{
-    const se=seasonOf(o.date),col=`var(${SEASON[se]})`;
-    const thumb=o.img?`<img src="${esc(o.img)}" alt="">`:`<span>${o.emoji||"🌿"}</span>`;
-    return `<div class="card" onclick='openDetail(${JSON.stringify(o.id)})'>
-      <div class="thumb">${thumb}<span class="season" style="background:${col}">${se}</span></div>
-      <div class="body"><h3>${esc(o.title)}</h3>
-        ${o.sci?`<div class="sci">${esc(o.sci)}</div>`:'<div class="sci" style="opacity:.5">—</div>'}
-        <div class="meta"><span>📍 ${esc(o.loc||'장소 미상')}</span><span>📅 ${esc(o.date||'')}</span><span>🏷 ${esc(o.cat||'')}</span></div>
-      </div></div>`;
-  }).join('');
+  const sp=new Set(items.map(o=>o.sci||o.title)), lp=new Set(items.map(o=>o.loc).filter(Boolean)), my=myIds();
+  document.getElementById("stats").innerHTML=
+    st(items.length,"관찰 기록")+st(sp.size,"종·대상")+st(lp.size,"탐방 장소")+st([...my].filter(id=>items.some(o=>o.id===id)).length,"내 기록");
+  const g=document.getElementById("grid");
+  if(!list.length){g.innerHTML='<div class="empty">아직 식자되지 않은 빈 지면입니다. 첫 표본을 등록해 주세요.</div>';renderIndex();return;}
+  g.innerHTML=list.map((o,i)=>{
+    const se=seasonOf(o.date),no=String(noMap[o.id]||0).padStart(4,"0");
+    const thumb=o.img?`<img src="${esc(o.img)}" alt="${esc(o.title)} · ${esc(o.loc)}" loading="lazy" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('beforeend',phSVG())">`:phSVG();
+    return `<article class="card" tabindex="0" role="button" aria-label="${esc(o.title)}" style="animation-delay:${Math.min(i*40,320)}ms"
+       onclick='openDetail(${JSON.stringify(o.id)})' onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail(${JSON.stringify(o.id)})}">
+      <div class="thumb"><span class="sdot" style="background:var(${SEASON[se]})" title="${se}"></span><span class="pin">${pinSVG()}</span>${thumb}</div>
+      <div class="cbody">
+        <h3 class="cname">${esc(o.title)}</h3>
+        <div class="csci">${o.sci?esc(o.sci):"—"}</div>
+        <div class="clabel"><span>No.${no}</span><span>· ${esc(o.loc||"장소 미상")}</span><span>· ${esc(o.date||"")}</span></div>
+      </div></article>`;}).join("");
+  renderIndex();
 }
-function stat(n,l){return `<div class="stat"><b>${n}</b><span>${l}</span></div>`;}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function st(n,l){return `<div class="stat"><b>${n}</b><span>${l}</span></div>`;}
+function phSVG(){return '<svg class="ph" width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" aria-hidden="true"><path d="M12 22c0-7 0-10 7-14-1 7-3.5 10.5-7 10.5S4.5 16 3.5 11C8 12 11 14.5 11.5 22"/><path d="M12 22V9"/></svg>';}
+function pinSVG(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M12 11v9"/></svg>';}
+function renderIndex(){
+  const byLoc={}; items.forEach(o=>{const k=o.loc||"기타";byLoc[k]=(byLoc[k]||0)+1;});
+  const rows=Object.entries(byLoc).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  document.getElementById("findex").innerHTML=rows.map(([k,v])=>`<div class="row"><span>${esc(k)}</span><span class="lead"></span><span>${v}</span></div>`).join("");
+  document.getElementById("editionLine").textContent=`자연탐방 박물지 · 총 ${items.length}점 · ${new Set(items.map(o=>o.loc).filter(Boolean)).size}개 탐방지`;
+}
 
 function openDetail(id){
-  const o=all().find(x=>x.id===id);if(!o)return;
-  const se=seasonOf(o.date),col=`var(${SEASON[se]})`;
-  const hero=o.img?`<img src="${esc(o.img)}" alt="">`:o.emoji||"🌿";
-  document.getElementById('modal').innerHTML=`
-    <div class="head"><h2>${esc(o.title)}</h2><button class="x" onclick="closeModal()">✕</button></div>
-    <div class="pad">
-      <div class="detail-hero">${hero}</div>
+  const o=items.find(x=>x.id===id);if(!o)return;
+  const se=seasonOf(o.date);
+  const order=[...items].sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  const no=String(order.findIndex(x=>x.id===id)+1).padStart(4,"0");
+  const hero=o.img?`<div class="plate-img"><img src="${esc(o.img)}" alt="${esc(o.title)}"></div>`:`<div class="plate-img">${phSVG()}</div>`;
+  const maps=o.loc?` <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.loc)}" target="_blank" rel="noopener" style="font-family:var(--font-mono);font-size:11px">🗺 지도</a>`:"";
+  document.getElementById("modal").innerHTML=`
+    <div class="mhead"><span class="plate">PLATE No.${no}</span><button class="x" onclick="closeModal()" aria-label="닫기">✕</button></div>
+    <div class="mpad">
+      ${hero}
+      <h2 class="mtitle">${esc(o.title)}</h2>
       <dl class="kv">
-        ${o.sci?`<dt>학명</dt><dd><i>${esc(o.sci)}</i></dd>`:''}
-        <dt>분류</dt><dd>${esc(o.cat||'-')}</dd>
-        <dt>계절</dt><dd><span style="color:${col};font-weight:800">${se}</span></dd>
-        <dt>장소</dt><dd>${esc(o.loc||'-')}${o.loc?` <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.loc)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600">🗺 지도</a>`:''}</dd>
-        <dt>날짜</dt><dd>${esc(o.date||'-')}</dd>
-        <dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
+        <dt>학명</dt><dd>${o.sci?`<i>${esc(o.sci)}</i>`:"—"}</dd>
+        <dt>분류</dt><dd>${esc(o.cat||"-")}</dd>
+        <dt>계절</dt><dd>${se}</dd>
+        <dt>장소</dt><dd>${esc(o.loc||"-")}${maps}</dd>
+        <dt>날짜</dt><dd>${esc(o.date||"-")}</dd>
+        <dt>관찰자</dt><dd>${esc(o.observer||"익명")}</dd>
       </dl>
-      ${o.notes?`<div class="notes">${esc(o.notes)}</div>`:''}
-      <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick='shareObs(${JSON.stringify(o.id)})'>🔗 공유 링크 복사</button>
-        ${SEED.find(s=>s.id===o.id)?'':`<button class="btn" style="background:#f0f4ee;color:#3a473f" onclick='delObs(${JSON.stringify(o.id)})'>🗑 삭제</button>`}
-      </div>
+      ${o.notes?`<div class="notes">${esc(o.notes)}</div>`:""}
+      <div style="margin-top:var(--sp-5)"><button class="btn btn-stamp" onclick='shareObs(${JSON.stringify(o.id)})'>🔗 공유 링크 복사</button></div>
     </div>`;
-  document.getElementById('ovl').classList.add('show');
+  showModal();
 }
-function closeModal(){document.getElementById('ovl').classList.remove('show');if(location.hash)history.replaceState(null,'',location.pathname+location.search);}
-
 let pickedEmoji="🌿";
 function openForm(){
-  const emojis=["🌿","🌸","🌳","🌹","🌾","🌼","🍄","🐝","🦋","🦅","🐍","🦌","🐦","🐸","🌊","⛰"];
-  document.getElementById('modal').innerHTML=`
-    <div class="head"><h2>＋ 자연 관찰 기록</h2><button class="x" onclick="closeModal()">✕</button></div>
-    <div class="pad">
-      <div class="field"><label>제목 *</label><input id="f-title" placeholder="예: 작약 군락"></div>
+  const E=["🌿","🌸","🌳","🌹","🌾","🌼","🍄","🦋","🐛","🐝","🦅","🐦","🐍","🦌","🌊","⛰"];
+  document.getElementById("modal").innerHTML=`
+    <div class="mhead"><span class="plate">SPECIMEN REGISTRATION</span><button class="x" onclick="closeModal()" aria-label="닫기">✕</button></div>
+    <div class="mpad">
+      <div class="field"><label>통명 (제목) *</label><input id="f-title" placeholder="예: 호랑나비 짝짓기"></div>
       <div class="row2">
-        <div class="field"><label>종 / 이름</label><input id="f-sci" placeholder="학명 또는 통명"></div>
-        <div class="field"><label>분류</label>
-          <select id="f-cat"><option>식물</option><option>동물</option><option>곤충</option><option>버섯</option><option>풍경</option><option>기타</option></select></div>
+        <div class="field"><label>학명</label><input id="f-sci" placeholder="Papilio xuthus"></div>
+        <div class="field"><label>분류</label><select id="f-cat"><option>식물</option><option>동물</option><option>곤충</option><option>버섯</option><option>풍경</option><option>기타</option></select></div>
       </div>
       <div class="row2">
-        <div class="field"><label>장소</label><input id="f-loc" placeholder="예: 안성 오흥리(보개면)"></div>
+        <div class="field"><label>장소</label><input id="f-loc" placeholder="안성 오흥리(보개면)"></div>
         <div class="field"><label>날짜</label><input id="f-date" type="date"></div>
       </div>
       <div class="field"><label>관찰 메모</label><textarea id="f-notes" placeholder="무엇을, 어떻게 보았나요? 생태 정보·느낌을 남겨주세요."></textarea></div>
-      <div class="field"><label>이미지 URL <span style="color:var(--muted);font-weight:400">(선택 — 없으면 이모지)</span></label><input id="f-img" placeholder="https://… (비워두면 아래 이모지 사용)"></div>
-      <div class="field"><label>대표 이모지</label><div class="emojipick" id="emojipick">${emojis.map(e=>`<button type="button" onclick="pickEmoji(this,'${e}')" class="${e==='🌿'?'on':''}">${e}</button>`).join('')}</div></div>
+      <div class="field"><label>사진 URL (선택)</label><input id="f-img" placeholder="https://… (비우면 도감 실루엣)"></div>
+      <div class="field"><label>대표 이모지</label><div class="emojipick" id="ep">${E.map(e=>`<button type="button" class="${e==='🌿'?'on':''}" onclick="pickE(this,'${e}')">${e}</button>`).join("")}</div></div>
       <div class="field"><label>관찰자</label><input id="f-obs" placeholder="이름 또는 닉네임 (선택)"></div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveObs()">🌱 기록 남기기</button>
+      <button class="btn btn-stamp" style="width:100%;justify-content:center" onclick="saveObs(this)">🖋 표본 등록(인장 찍기)</button>
     </div>`;
-  pickedEmoji="🌿";
-  const d=document.getElementById('f-date'); d.value=new Date().toISOString().slice(0,10);
-  document.getElementById('ovl').classList.add('show');
+  pickedEmoji="🌿";document.getElementById("f-date").value=new Date().toISOString().slice(0,10);showModal();
 }
-function pickEmoji(btn,e){pickedEmoji=e;document.querySelectorAll('#emojipick button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-function saveObs(){
-  const t=val('f-title'); if(!t){toast('제목을 입력해 주세요');return;}
-  const o={id:'u-'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),
-    title:t,sci:val('f-sci'),cat:val('f-cat'),loc:val('f-loc'),date:val('f-date')||new Date().toISOString().slice(0,10),
-    notes:val('f-notes'),img:val('f-img'),emoji:pickedEmoji,obs:val('f-obs')||'익명'};
-  const m=mine();m.unshift(o);saveMine(m);closeModal();render();toast('기록을 남겼어요 🌱');
+function pickE(b,e){pickedEmoji=e;document.querySelectorAll("#ep button").forEach(x=>x.classList.remove("on"));b.classList.add("on");}
+function v(id){return (document.getElementById(id).value||"").trim();}
+async function saveObs(btn){
+  const title=v("f-title");if(!title){toast("통명(제목)을 입력해 주세요");return;}
+  if(btn)btn.disabled=true;
+  const rec={title,sci:v("f-sci"),cat:v("f-cat"),loc:v("f-loc"),obs_date:v("f-date")||new Date().toISOString().slice(0,10),
+    notes:v("f-notes"),img:v("f-img"),emoji:pickedEmoji,observer:v("f-obs")||"익명"};
+  if(sb&&online){
+    try{
+      const {data,error}=await sb.from("observations").insert(rec).select().single();
+      if(error)throw error;
+      const o=mapRow(data);addMyId(o.id);
+      if(!items.some(x=>x.id===o.id))items.unshift(o);
+      closeModal();render();toast("표본을 박물지에 등록했어요 🌱 (모두에게 공유됨)");return;
+    }catch(e){ toast("등록 실패: "+((e&&e.message)||"네트워크 오류")+" — 로컬 임시저장"); }
+  }
+  const o={id:"loc-"+Date.now().toString(36),date:rec.obs_date,...rec};o.date=rec.obs_date;
+  const l=localList();l.unshift(o);localStorage.setItem(LS,JSON.stringify(l));addMyId(o.id);
+  if(!items.some(x=>x.id===o.id))items.unshift(o);closeModal();render();toast("로컬에 임시 저장했어요(오프라인)");
 }
-function val(id){return (document.getElementById(id).value||'').trim();}
-function delObs(id){if(!confirm('이 기록을 삭제할까요?'))return;saveMine(mine().filter(o=>o.id!==id));closeModal();render();toast('삭제했어요');}
 
-/* 공유: 관찰을 URL 해시에 인코딩 */
-function shareObs(id){
-  const o=all().find(x=>x.id===id);if(!o)return;
-  const payload=btoa(unescape(encodeURIComponent(JSON.stringify(o))));
-  const url=location.origin+location.pathname+'#obs='+payload;
-  copy(url,'공유 링크를 복사했어요 🔗 (받는 분이 같은 관찰을 봅니다)');
-}
-function shareApp(){copy(location.origin+location.pathname,'네이처 렌즈 링크를 복사했어요 🔗');}
-function copy(text,msg){
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast(msg),()=>prompt('아래 링크를 복사하세요:',text));}
-  else prompt('아래 링크를 복사하세요:',text);
-}
-function loadFromHash(){
-  const m=location.hash.match(/obs=([^&]+)/);if(!m)return;
-  try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-    all(); openSharedDetail(o);
-  }catch(e){}
-}
-function openSharedDetail(o){
-  const exists=all().some(x=>x.id===o.id);
-  openDetail2(o, !exists);
-}
-function openDetail2(o, offerAdd){
-  const se=seasonOf(o.date),col=`var(${SEASON[se]})`;
-  const hero=o.img?`<img src="${esc(o.img)}" alt="">`:o.emoji||"🌿";
-  document.getElementById('modal').innerHTML=`
-    <div class="head"><h2>${esc(o.title)} <span style="font-size:12px;color:var(--muted)">· 공유된 관찰</span></h2><button class="x" onclick="closeModal()">✕</button></div>
-    <div class="pad">
-      <div class="detail-hero">${hero}</div>
-      <dl class="kv">
-        ${o.sci?`<dt>학명</dt><dd><i>${esc(o.sci)}</i></dd>`:''}
-        <dt>분류</dt><dd>${esc(o.cat||'-')}</dd><dt>계절</dt><dd><span style="color:${col};font-weight:800">${se}</span></dd>
-        <dt>장소</dt><dd>${esc(o.loc||'-')}${o.loc?` <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.loc)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600">🗺 지도</a>`:''}</dd><dt>날짜</dt><dd>${esc(o.date||'-')}</dd><dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
-      </dl>
-      ${o.notes?`<div class="notes">${esc(o.notes)}</div>`:''}
-      ${offerAdd?`<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick='addShared(${JSON.stringify(o).replace(/'/g,"&#39;")})'>＋ 내 렌즈에 추가</button>`:'<div style="margin-top:14px;color:var(--muted);font-size:13px">이미 내 렌즈에 있는 관찰입니다.</div>'}
-    </div>`;
-  document.getElementById('ovl').classList.add('show');
-}
-function addShared(o){const m=mine();if(!m.some(x=>x.id===o.id)){m.unshift(o);saveMine(m);}closeModal();render();toast('내 렌즈에 추가했어요 🌱');}
-
+function shareObs(id){const o=items.find(x=>x.id===id);if(!o)return;copy(location.origin+location.pathname+"#obs="+encodeURIComponent(o.id),"공유 링크를 복사했어요 🔗");}
+function shareApp(){copy(location.origin+location.pathname,"박물지 링크를 복사했어요 🔗");}
+function copy(t,m){(navigator.clipboard&&navigator.clipboard.writeText)?navigator.clipboard.writeText(t).then(()=>toast(m),()=>prompt("복사하세요:",t)):prompt("복사하세요:",t);}
 function exportData(){
-  const blob=new Blob([JSON.stringify({app:'naturelens',exported:new Date().toISOString(),observations:all()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='naturelens_export.json';a.click();toast('데이터를 내보냈어요 ⬇');
+  const blob=new Blob([JSON.stringify({app:"naturelens",exported:new Date().toISOString(),observations:items},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="naturelens_export.json";a.click();toast("표본을 내보냈어요 ⬇");
 }
-function importData(ev){
+async function importData(ev){
   const f=ev.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const j=JSON.parse(r.result);const list=Array.isArray(j)?j:j.observations||[];
-    const m=mine();const ids=new Set(m.map(o=>o.id));let n=0;
-    list.forEach(o=>{if(o&&o.id&&!ids.has(o.id)&&!SEED.find(s=>s.id===o.id)){m.unshift(o);ids.add(o.id);n++;}});
-    saveMine(m);render();toast(n+'건을 가져왔어요 ⬆');
-  }catch(e){toast('가져오기 실패: 올바른 JSON이 아니에요');}};
-  r.readAsText(f);ev.target.value='';
+  r.onload=async()=>{try{
+    const j=JSON.parse(r.result);const arr=Array.isArray(j)?j:(j.observations||[]);let n=0;
+    for(const o of arr){
+      if(!o||!o.title)continue;
+      const rec={title:o.title,sci:o.sci||"",cat:o.cat||"기타",loc:o.loc||"",obs_date:o.date||o.obs_date||new Date().toISOString().slice(0,10),notes:o.notes||"",img:o.img||"",emoji:o.emoji||"🌿",observer:o.observer||"익명"};
+      if(sb&&online){const {data,error}=await sb.from("observations").insert(rec).select().single();if(!error&&data){const m=mapRow(data);addMyId(m.id);if(!items.some(x=>x.id===m.id)){items.unshift(m);n++;}}}
+      else{const m={id:"loc-"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),...rec,date:rec.obs_date};const l=localList();l.unshift(m);localStorage.setItem(LS,JSON.stringify(l));if(!items.some(x=>x.id===m.id)){items.unshift(m);n++;}}
+    }
+    render();toast(n+"건을 가져왔어요 ⬆");
+  }catch(e){toast("가져오기 실패: 올바른 JSON이 아니에요");}};
+  r.readAsText(f);ev.target.value="";
 }
-function resetMine(){if(!confirm('내가 남긴 기록을 모두 지울까요? (시드 데이터는 유지)'))return;localStorage.removeItem(LS);render();toast('내 기록을 초기화했어요');}
+function resetMine(){if(!confirm("내 로컬 임시 기록을 지울까요? (공유본·시드는 유지)"))return;localStorage.removeItem(LS);localStorage.removeItem(MYIDS);location.reload();}
 
-render();
-loadFromHash();
+function showModal(){document.getElementById("ovl").classList.add("show");}
+function closeModal(){document.getElementById("ovl").classList.remove("show");if(location.hash)history.replaceState(null,"",location.pathname+location.search);}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t);const b=document.getElementById("themeBtn");b.textContent=t==="dark"?"☀":"☾";b.setAttribute("aria-pressed",t==="dark");localStorage.setItem("nl_theme",t);}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");}
+(function initTheme(){const s=localStorage.getItem("nl_theme");applyTheme(s||((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"));})();
+
+function openFromHash(){const m=location.hash.match(/obs=([^&]+)/);if(!m)return;const id=decodeURIComponent(m[1]);if(items.some(o=>o.id===id))openDetail(id);}
+(async function init(){ await loadObs(); render(); openFromHash(); })();
 </script>
 </body>
 </html>
