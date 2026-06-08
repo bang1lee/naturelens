@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>네이처 렌즈 · 뉴리프 자연탐방 아카이브</title>
+<meta name="description" content="오흥리 보개면·굴업도 자연탐방 데이터를 쌓고 나누는 뉴리프 네이처 렌즈. 링크만으로 누구나.">
+<style>
+  :root{
+    --green:#1F5F3A; --leaf:#98C461; --deep:#081116;
+    --paper:#FBFDF8; --ink:#23302a; --muted:#6b7a70; --line:#e3ece1;
+    --card:#ffffff; --shadow:0 6px 22px rgba(16,40,28,.08);
+    --spring:#E8829B; --summer:#3D8252; --autumn:#D98A3D; --winter:#5B86B0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--green)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+
+  /* Hero */
+  header.hero{background:
+      radial-gradient(1200px 400px at 80% -10%, rgba(152,196,97,.35), transparent 60%),
+      linear-gradient(135deg, #15412a 0%, var(--green) 55%, #2c7a4d 100%);
+    color:#eafaef;padding:38px 0 30px;position:relative;overflow:hidden}
+  .hero h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+  .hero .lens{font-size:30px}
+  .hero p{margin:10px 0 0;max-width:640px;color:#d6f0de;font-size:15px}
+  .hero .tag{display:inline-block;margin-top:14px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 13px;font-size:12.5px}
+  .hero .cta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  .btn{cursor:pointer;border:none;border-radius:11px;padding:11px 16px;font-size:14px;font-weight:700;
+    font-family:inherit;transition:.15s;display:inline-flex;align-items:center;gap:7px}
+  .btn-primary{background:var(--leaf);color:#0f3220}
+  .btn-primary:hover{background:#aee079;transform:translateY(-1px)}
+  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
+  .btn-ghost:hover{background:rgba(255,255,255,.2)}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:-22px auto 0;position:relative;z-index:2}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow)}
+  .stat b{display:block;font-size:24px;color:var(--green);font-weight:800;line-height:1.1}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* Controls */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:24px 0 16px}
+  .search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+    border-radius:11px;padding:9px 13px}
+  .search input{border:none;outline:none;font-size:14px;width:100%;font-family:inherit;background:transparent}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:13px;color:var(--muted);transition:.12s}
+  .chip:hover{border-color:var(--leaf)}
+  .chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+
+  /* Grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin:8px 0 40px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:var(--shadow);cursor:pointer;transition:.16s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(16,40,28,.13)}
+  .card .thumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:60px;
+    background:linear-gradient(135deg,#eef6e9,#dcebd2 0%,#e7f2df);position:relative}
+  .card .thumb img{width:100%;height:100%;object-fit:cover}
+  .card .season{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:#fff;
+    padding:3px 9px;border-radius:999px}
+  .card .body{padding:13px 14px 15px}
+  .card h3{margin:0 0 3px;font-size:16px;font-weight:800;letter-spacing:-.01em}
+  .card .sci{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px}
+  .card .meta{display:flex;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .card .meta span{display:inline-flex;align-items:center;gap:3px}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:50px 0}
+
+  /* Modal */
+  .ovl{position:fixed;inset:0;background:rgba(8,17,22,.55);display:none;align-items:center;justify-content:center;
+    z-index:50;padding:18px}
+  .ovl.show{display:flex}
+  .modal{background:#fff;border-radius:18px;max-width:540px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+  .modal .head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff}
+  .modal .head h2{margin:0;font-size:18px}
+  .x{cursor:pointer;border:none;background:#f0f4ee;border-radius:9px;width:32px;height:32px;font-size:18px;color:var(--muted)}
+  .modal .pad{padding:18px 20px}
+  .detail-hero{height:170px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:84px;
+    background:linear-gradient(135deg,#eef6e9,#e7f2df);margin-bottom:14px;overflow:hidden}
+  .detail-hero img{width:100%;height:100%;object-fit:cover}
+  .kv{display:grid;grid-template-columns:84px 1fr;gap:7px 12px;font-size:14px;margin:12px 0}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0;font-weight:600}
+  .notes{background:#f6faf3;border-left:3px solid var(--leaf);border-radius:8px;padding:12px 14px;font-size:14px;color:#3a473f;margin-top:6px}
+
+  /* Form */
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px;color:#3a473f}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--leaf)}
+  .field textarea{min-height:76px;resize:vertical}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .emojipick{display:flex;gap:6px;flex-wrap:wrap}
+  .emojipick button{font-size:22px;background:#f3f7f0;border:2px solid transparent;border-radius:10px;width:42px;height:42px;cursor:pointer}
+  .emojipick button.on{border-color:var(--leaf);background:#e7f3dd}
+
+  footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:13px}
+  footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center}
+  .linkbtn{background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;padding:0}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--deep);color:#eafaef;
+    padding:11px 18px;border-radius:11px;font-size:14px;opacity:0;transition:.25s;z-index:100;pointer-events:none}
+  .toast.show{opacity:1}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.hero h1{font-size:24px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <h1><span class="lens">🌿</span> 네이처 렌즈 <span style="font-weight:400;font-size:18px;opacity:.85">Nature Lens</span></h1>
+    <p>오흥리 보개면·굴업도… 뉴리프 자연탐방의 순간을 <b>기록하고 나누는</b> 열린 아카이브.
+       앱 설치 없이 <b>이 링크 하나</b>로 누구나 보고, 남기고, 공유합니다.</p>
+    <span class="tag">🌱 (사)뉴리프 아카이브 · 웹 기반 MVP · 데이터를 쌓는 렌즈</span>
+    <div class="cta">
+      <button class="btn btn-primary" onclick="openForm()">＋ 관찰 기록하기</button>
+      <button class="btn btn-ghost" onclick="exportData()">⬇ 데이터 내보내기</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('imp').click()">⬆ 가져오기</button>
+      <input id="imp" type="file" accept="application/json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stats" id="stats"></div>
+
+  <div class="controls">
+    <div class="search">🔎 <input id="q" placeholder="종·장소·메모 검색…" oninput="render()"></div>
+    <div class="chips" id="seasonChips"></div>
+  </div>
+  <div class="chips" id="catChips" style="margin-bottom:6px"></div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>
+  <div class="wrap row">
+    <div>🌿 <b>네이처 렌즈</b> — 자연탐방 데이터를 쌓고 나누는 뉴리프의 렌즈. 지금은 웹 MVP, 추후 퍼블릭 앱.</div>
+    <div>
+      <button class="linkbtn" onclick="shareApp()">🔗 이 렌즈 공유</button> ·
+      <button class="linkbtn" onclick="resetMine()">내 기록 초기화</button>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:8px;font-size:12px;opacity:.75">
+    공유 방식: 관찰을 열고 <b>공유 링크</b>를 복사하면 받는 사람이 같은 관찰을 봅니다 · 단체 데이터는
+    <b>내보내기/가져오기(JSON)</b>로 합칩니다(퍼블릭 앱 단계에서 실시간 공유 백엔드로 전환).
+  </div>
+</footer>
+
+<!-- 상세 / 폼 모달 -->
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SEED = [
+  {id:"s-jakyak", title:"작약 군락", sci:"Paeonia lactiflora", emoji:"🌸", cat:"식물",
+   loc:"안성 오흥리(보개면)", date:"2026-05-24", notes:"오흥리 6차산업 시범지 일대 작약 개화. 뉴리프 작약 생태 미디어('우아한 고요')의 무대. 함박꽃이라 불리며 뿌리는 한방 약재로 쓰인다.", obs:"뉴리프 아카이브"},
+  {id:"s-camp", title:"청소년 자연캠프 현장", sci:"", emoji:"🧒", cat:"풍경",
+   loc:"안성 오흥리(보개면)", date:"2026-05-10", notes:"안성지역 초·중·고 학생 대상 자연탐방 캠프. 텃밭·생태 관찰로 자연 감수성을 쌓는 뉴리프 정기 프로그램(5/10·5/31·6/7).", obs:"뉴리프 아카이브"},
+  {id:"s-bee", title:"양봉 꿀벌 방문", sci:"Apis mellifera", emoji:"🐝", cat:"곤충",
+   loc:"안성 오흥리 치유텃밭", date:"2026-06-07", notes:"치유농업 텃밭의 꽃을 찾는 꿀벌. 수분 매개자 활동은 6차산업 재생유기농의 건강성 지표.", obs:"뉴리프 아카이브"},
+  {id:"s-sosa", title:"소사나무 능선 군락", sci:"Carpinus turczaninowii", emoji:"🌳", cat:"식물",
+   loc:"인천 옹진 굴업도", date:"2025-10-12", notes:"굴업도 개머리능선의 바람에 휜 소사나무 군락. 섬 생태경관의 상징이자 핵폐기장 반대로 지켜낸 풍경.", obs:"뉴리프 아카이브"},
+  {id:"s-eoksae", title:"개머리능선 억새 물결", sci:"Miscanthus sinensis", emoji:"🌾", cat:"풍경",
+   loc:"인천 옹진 굴업도", date:"2025-10-12", notes:"가을 굴업도 능선을 덮는 억새. 코끼리바위·해식절벽과 어우러진 덕적군도의 대표 경관.", obs:"뉴리프 아카이브"},
+  {id:"s-haedang", title:"해당화", sci:"Rosa rugosa", emoji:"🌹", cat:"식물",
+   loc:"덕적군도 해안사구", date:"2025-06-20", notes:"바닷가 모래언덕에 자생하는 해당화. 해안 생물다양성의 지표종으로 사구 보전의 깃대종.", obs:"뉴리프 아카이브"},
+  {id:"s-falcon", title:"맹금류 활공(말똥가리)", sci:"Buteo buteo", emoji:"🦅", cat:"동물",
+   loc:"인천 옹진 굴업도", date:"2025-11-03", notes:"섬 상공을 도는 맹금류. 굴업도·덕적군도는 이동 철새와 맹금류의 중간 기착지로 생물다양성이 풍부하다.", obs:"뉴리프 아카이브"},
+  {id:"s-snake", title:"구렁이 흔적", sci:"Elaphe schrenckii", emoji:"🐍", cat:"동물",
+   loc:"인천 옹진 굴업도", date:"2025-08-15", notes:"멸종위기 야생생물 구렁이의 서식 흔적. 섬 생태계 건강성을 보여주는 상위 포식자.", obs:"뉴리프 아카이브"},
+  {id:"s-sanguk", title:"산국 가을꽃", sci:"Chrysanthemum boreale", emoji:"🌼", cat:"식물",
+   loc:"안성 오흥리 일대", date:"2025-10-25", notes:"들녘과 능선의 노란 산국. 향이 진해 약용·차로도 쓰이며 늦가을 수분 매개자에게 중요한 밀원.", obs:"뉴리프 아카이브"},
+  {id:"s-deer", title:"고라니 발자국", sci:"Hydropotes inermis", emoji:"🦌", cat:"동물",
+   loc:"안성 오흥리 탐방로", date:"2026-01-18", notes:"겨울 눈밭에 남은 고라니 발자국. 야생동물 이동 통로 확인은 탐방로 생태 모니터링의 기본.", obs:"뉴리프 아카이브"},
+];
+
+const SEASON = {봄:"--spring",여름:"--summer",가을:"--autumn",겨울:"--winter"};
+function seasonOf(date){const m=+(date||"").slice(5,7); if(m>=3&&m<=5)return"봄"; if(m>=6&&m<=8)return"여름"; if(m>=9&&m<=11)return"가을"; return"겨울";}
+const LS="naturelens_observations_v1";
+let fSeason="전체", fCat="전체";
+
+function mine(){try{return JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){return[]}}
+function saveMine(a){localStorage.setItem(LS,JSON.stringify(a))}
+function all(){const m=mine();const ids=new Set(m.map(o=>o.id));return [...m, ...SEED.filter(s=>!ids.has(s.id))];}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
+
+function render(){
+  const data=all();
+  const q=(document.getElementById('q').value||"").toLowerCase().trim();
+  // chips
+  const seasons=["전체","봄","여름","가을","겨울"];
+  document.getElementById('seasonChips').innerHTML=seasons.map(s=>
+    `<button class="chip ${fSeason===s?'on':''}" onclick="fSeason='${s}';render()">${s}</button>`).join('');
+  const cats=["전체",...Array.from(new Set(data.map(o=>o.cat)))];
+  document.getElementById('catChips').innerHTML=cats.map(c=>
+    `<button class="chip ${fCat===c?'on':''}" onclick="fCat='${c}';render()">${c==='전체'?'모든 분류':c}</button>`).join('');
+  // filter
+  let list=data.filter(o=>{
+    const se=seasonOf(o.date);
+    if(fSeason!=="전체"&&se!==fSeason)return false;
+    if(fCat!=="전체"&&o.cat!==fCat)return false;
+    if(q){const hay=(o.title+o.sci+o.loc+o.notes+o.cat+o.obs).toLowerCase();if(!hay.includes(q))return false;}
+    return true;
+  }).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  // stats
+  const sp=new Set(all().map(o=>o.sci||o.title)), lp=new Set(all().map(o=>o.loc));
+  document.getElementById('stats').innerHTML=
+    stat(all().length,"관찰 기록")+stat(sp.size,"종·대상")+stat(lp.size,"탐방 장소")+stat(mine().length,"내가 남긴 기록");
+  // grid
+  const g=document.getElementById('grid');
+  if(!list.length){g.innerHTML='<div class="empty">조건에 맞는 관찰이 없어요. 첫 기록을 남겨보세요 🌱</div>';return;}
+  g.innerHTML=list.map(o=>{
+    const se=seasonOf(o.date),col=`var(${SEASON[se]})`;
+    const thumb=o.img?`<img src="${esc(o.img)}" alt="">`:`<span>${o.emoji||"🌿"}</span>`;
+    return `<div class="card" onclick='openDetail(${JSON.stringify(o.id)})'>
+      <div class="thumb">${thumb}<span class="season" style="background:${col}">${se}</span></div>
+      <div class="body"><h3>${esc(o.title)}</h3>
+        ${o.sci?`<div class="sci">${esc(o.sci)}</div>`:'<div class="sci" style="opacity:.5">—</div>'}
+        <div class="meta"><span>📍 ${esc(o.loc||'장소 미상')}</span><span>📅 ${esc(o.date||'')}</span><span>🏷 ${esc(o.cat||'')}</span></div>
+      </div></div>`;
+  }).join('');
+}
+function stat(n,l){return `<div class="stat"><b>${n}</b><span>${l}</span></div>`;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function openDetail(id){
+  const o=all().find(x=>x.id===id);if(!o)return;
+  const se=seasonOf(o.date),col=`var(${SEASON[se]})`;
+  const hero=o.img?`<img src="${esc(o.img)}" alt="">`:o.emoji||"🌿";
+  document.getElementById('modal').innerHTML=`
+    <div class="head"><h2>${esc(o.title)}</h2><button class="x" onclick="closeModal()">✕</button></div>
+    <div class="pad">
+      <div class="detail-hero">${hero}</div>
+      <dl class="kv">
+        ${o.sci?`<dt>학명</dt><dd><i>${esc(o.sci)}</i></dd>`:''}
+        <dt>분류</dt><dd>${esc(o.cat||'-')}</dd>
+        <dt>계절</dt><dd><span style="color:${col};font-weight:800">${se}</span></dd>
+        <dt>장소</dt><dd>${esc(o.loc||'-')}</dd>
+        <dt>날짜</dt><dd>${esc(o.date||'-')}</dd>
+        <dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
+      </dl>
+      ${o.notes?`<div class="notes">${esc(o.notes)}</div>`:''}
+      <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick='shareObs(${JSON.stringify(o.id)})'>🔗 공유 링크 복사</button>
+        ${SEED.find(s=>s.id===o.id)?'':`<button class="btn" style="background:#f0f4ee;color:#3a473f" onclick='delObs(${JSON.stringify(o.id)})'>🗑 삭제</button>`}
+      </div>
+    </div>`;
+  document.getElementById('ovl').classList.add('show');
+}
+function closeModal(){document.getElementById('ovl').classList.remove('show');if(location.hash)history.replaceState(null,'',location.pathname+location.search);}
+
+let pickedEmoji="🌿";
+function openForm(){
+  const emojis=["🌿","🌸","🌳","🌹","🌾","🌼","🍄","🐝","🦋","🦅","🐍","🦌","🐦","🐸","🌊","⛰"];
+  document.getElementById('modal').innerHTML=`
+    <div class="head"><h2>＋ 자연 관찰 기록</h2><button class="x" onclick="closeModal()">✕</button></div>
+    <div class="pad">
+      <div class="field"><label>제목 *</label><input id="f-title" placeholder="예: 작약 군락"></div>
+      <div class="row2">
+        <div class="field"><label>종 / 이름</label><input id="f-sci" placeholder="학명 또는 통명"></div>
+        <div class="field"><label>분류</label>
+          <select id="f-cat"><option>식물</option><option>동물</option><option>곤충</option><option>버섯</option><option>풍경</option><option>기타</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>장소</label><input id="f-loc" placeholder="예: 안성 오흥리(보개면)"></div>
+        <div class="field"><label>날짜</label><input id="f-date" type="date"></div>
+      </div>
+      <div class="field"><label>관찰 메모</label><textarea id="f-notes" placeholder="무엇을, 어떻게 보았나요? 생태 정보·느낌을 남겨주세요."></textarea></div>
+      <div class="field"><label>이미지 URL <span style="color:var(--muted);font-weight:400">(선택 — 없으면 이모지)</span></label><input id="f-img" placeholder="https://… (비워두면 아래 이모지 사용)"></div>
+      <div class="field"><label>대표 이모지</label><div class="emojipick" id="emojipick">${emojis.map(e=>`<button type="button" onclick="pickEmoji(this,'${e}')" class="${e==='🌿'?'on':''}">${e}</button>`).join('')}</div></div>
+      <div class="field"><label>관찰자</label><input id="f-obs" placeholder="이름 또는 닉네임 (선택)"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveObs()">🌱 기록 남기기</button>
+    </div>`;
+  pickedEmoji="🌿";
+  const d=document.getElementById('f-date'); d.value=new Date().toISOString().slice(0,10);
+  document.getElementById('ovl').classList.add('show');
+}
+function pickEmoji(btn,e){pickedEmoji=e;document.querySelectorAll('#emojipick button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function saveObs(){
+  const t=val('f-title'); if(!t){toast('제목을 입력해 주세요');return;}
+  const o={id:'u-'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),
+    title:t,sci:val('f-sci'),cat:val('f-cat'),loc:val('f-loc'),date:val('f-date')||new Date().toISOString().slice(0,10),
+    notes:val('f-notes'),img:val('f-img'),emoji:pickedEmoji,obs:val('f-obs')||'익명'};
+  const m=mine();m.unshift(o);saveMine(m);closeModal();render();toast('기록을 남겼어요 🌱');
+}
+function val(id){return (document.getElementById(id).value||'').trim();}
+function delObs(id){if(!confirm('이 기록을 삭제할까요?'))return;saveMine(mine().filter(o=>o.id!==id));closeModal();render();toast('삭제했어요');}
+
+/* 공유: 관찰을 URL 해시에 인코딩 */
+function shareObs(id){
+  const o=all().find(x=>x.id===id);if(!o)return;
+  const payload=btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  const url=location.origin+location.pathname+'#obs='+payload;
+  copy(url,'공유 링크를 복사했어요 🔗 (받는 분이 같은 관찰을 봅니다)');
+}
+function shareApp(){copy(location.origin+location.pathname,'네이처 렌즈 링크를 복사했어요 🔗');}
+function copy(text,msg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast(msg),()=>prompt('아래 링크를 복사하세요:',text));}
+  else prompt('아래 링크를 복사하세요:',text);
+}
+function loadFromHash(){
+  const m=location.hash.match(/obs=([^&]+)/);if(!m)return;
+  try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    all(); openSharedDetail(o);
+  }catch(e){}
+}
+function openSharedDetail(o){
+  const exists=all().some(x=>x.id===o.id);
+  openDetail2(o, !exists);
+}
+function openDetail2(o, offerAdd){
+  const se=seasonOf(o.date),col=`var(${SEASON[se]})`;
+  const hero=o.img?`<img src="${esc(o.img)}" alt="">`:o.emoji||"🌿";
+  document.getElementById('modal').innerHTML=`
+    <div class="head"><h2>${esc(o.title)} <span style="font-size:12px;color:var(--muted)">· 공유된 관찰</span></h2><button class="x" onclick="closeModal()">✕</button></div>
+    <div class="pad">
+      <div class="detail-hero">${hero}</div>
+      <dl class="kv">
+        ${o.sci?`<dt>학명</dt><dd><i>${esc(o.sci)}</i></dd>`:''}
+        <dt>분류</dt><dd>${esc(o.cat||'-')}</dd><dt>계절</dt><dd><span style="color:${col};font-weight:800">${se}</span></dd>
+        <dt>장소</dt><dd>${esc(o.loc||'-')}</dd><dt>날짜</dt><dd>${esc(o.date||'-')}</dd><dt>관찰자</dt><dd>${esc(o.obs||'익명')}</dd>
+      </dl>
+      ${o.notes?`<div class="notes">${esc(o.notes)}</div>`:''}
+      ${offerAdd?`<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick='addShared(${JSON.stringify(o).replace(/'/g,"&#39;")})'>＋ 내 렌즈에 추가</button>`:'<div style="margin-top:14px;color:var(--muted);font-size:13px">이미 내 렌즈에 있는 관찰입니다.</div>'}
+    </div>`;
+  document.getElementById('ovl').classList.add('show');
+}
+function addShared(o){const m=mine();if(!m.some(x=>x.id===o.id)){m.unshift(o);saveMine(m);}closeModal();render();toast('내 렌즈에 추가했어요 🌱');}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({app:'naturelens',exported:new Date().toISOString(),observations:all()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='naturelens_export.json';a.click();toast('데이터를 내보냈어요 ⬇');
+}
+function importData(ev){
+  const f=ev.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const j=JSON.parse(r.result);const list=Array.isArray(j)?j:j.observations||[];
+    const m=mine();const ids=new Set(m.map(o=>o.id));let n=0;
+    list.forEach(o=>{if(o&&o.id&&!ids.has(o.id)&&!SEED.find(s=>s.id===o.id)){m.unshift(o);ids.add(o.id);n++;}});
+    saveMine(m);render();toast(n+'건을 가져왔어요 ⬆');
+  }catch(e){toast('가져오기 실패: 올바른 JSON이 아니에요');}};
+  r.readAsText(f);ev.target.value='';
+}
+function resetMine(){if(!confirm('내가 남긴 기록을 모두 지울까요? (시드 데이터는 유지)'))return;localStorage.removeItem(LS);render();toast('내 기록을 초기화했어요');}
+
+render();
+loadFromHash();
+</script>
+</body>
+</html>
